@@ -31,9 +31,8 @@ class App extends Component {
 
   //post request to add a new task to the REST API
   addTask() {
-    axios.post('http://localhost:3000/tasks', this.state.newTaskData).then((response) => {
-    let { tasks } = this.state;  
-    tasks.push(response.data);
+    axios.post('http://localhost:3001/task', this.state.newTaskData).then((response) => {
+      let { tasks } = this.state;  
       this.setState({ tasks, newTaskModal: false, newTaskData: {
         id: '',
         description: '',
@@ -45,15 +44,16 @@ class App extends Component {
   }
 
   //delete request to remove a task of the REST API
-  deleteTask(id) {
-    axios.delete('http://localhost:3000/tasks/' + id).then((response) => {
+  //post request used because axios does not support body on a delete request
+  deleteTask(task) {
+    axios.post('http://localhost:3001/deleteTask', task).then((response) => {
       this._refreshList();
     });
   }
 
   //get request to update task state with the data from the REST API
   _refreshList() {
-    axios.get('http://localhost:3000/tasks').then((response) => {
+    axios.get('http://localhost:3001/tasks').then((response) => {
       this.setState({
         tasks: response.data
       })
@@ -70,7 +70,7 @@ class App extends Component {
           <td>{task.duedate}</td>
           <td>{task.class}</td>
           <td>
-            <Button color="danger" size="sm" onClick={this.deleteTask.bind(this, task.id)}>Delete</Button>
+            <Button color="danger" size="sm" onClick={this.deleteTask.bind(this, task)}>Delete</Button>
           </td>
         </tr>
       )
@@ -87,8 +87,8 @@ class App extends Component {
         <ModalHeader toggle={this.toggleNewTaskModal.bind(this)}>Add a new task</ModalHeader>
         <ModalBody>
           <FormGroup>
-            <Label for="description">ID</Label>
-            <Input id="description" value={this.state.newTaskData.id} onChange={(e) => {
+            <Label for="id">ID</Label>
+            <Input id="id" value={this.state.newTaskData.id} onChange={(e) => {
               let { newTaskData } = this.state;
               newTaskData.id = e.target.value;
               this.setState({ newTaskData });
